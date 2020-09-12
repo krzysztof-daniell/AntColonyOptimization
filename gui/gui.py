@@ -29,6 +29,7 @@ class GraphicalUserInterface:
         self._display_best_solution = None
         self._draw_map_object = draw_map
         self._draw_map = None
+        self._drawn_map_matrix = None
         self.aco_controller_object = aco_controller
         self.aco_controller = None
 
@@ -56,12 +57,15 @@ class GraphicalUserInterface:
         self.aco_controller = self.aco_controller_object(
             self._width,
             self._height,
-            self._draw_map.pheromone_matrix,
+            self._drawn_map_matrix,
             PheromoneLogic,
             AntLogic,
         )
 
     def create_display_map(self):
+        if self._drawn_map_matrix is None:
+            self._drawn_map_matrix = self._draw_map.pheromone_matrix
+
         self._create_aco_controller()
         self._destroy_frame()
         self._frame = tk.Frame(self._master)
@@ -144,35 +148,59 @@ class GraphicalUserInterface:
             self._frame, text='Finish', command=self.display_best_solution)
         finish_button.grid(row=20, column=3)
 
+        # while True:
+        #     for ant in self.aco_controller.ants:
+        #         self.aco_controller.choose_path_of_an_ant(ant, alpha.get())
+        #         self.change_ant_position_on_display_map(ant)
+
+        #     self.update_display_map()
+        #     self.aco_controller.evaporate_pheromone(
+        #         evaporate_coefficent.get())
+        #     self.aco_controller.deposit_pheromone(
+        #         deposit_coefficent.get())
+
+        #     string_variable.set(
+        #         f'Iterations: {self.aco_controller.iterations}')
         while True:
-            for ant in self.aco_controller.ants:
-                self.aco_controller.choose_path_of_an_ant(ant, alpha.get())
-                self.change_ant_position_on_display_map(ant)
-
-            self.update_display_map()
-            self.aco_controller.evaporate_pheromone(
-                evaporate_coefficent.get())
-            self.aco_controller.deposit_pheromone(
-                deposit_coefficent.get())
-
-            string_variable.set(
-                f'Iterations: {self.aco_controller.iterations}')
+            self._aco_step(
+                evaporate_coefficent,
+                deposit_coefficent,
+                alpha,
+                string_variable,
+            )
 
         self._master.mainloop()
+
+    def _aco_step(self, evaporate_coefficent, deposit_coefficent, alpha,
+                  string_variable):
+        for ant in self.aco_controller.ants:
+            self.aco_controller.choose_path_of_an_ant(ant, alpha.get())
+            self.change_ant_position_on_display_map(ant)
+
+        self.update_display_map()
+        self.aco_controller.evaporate_pheromone(
+            evaporate_coefficent.get())
+        self.aco_controller.deposit_pheromone(
+            deposit_coefficent.get())
+
+        string_variable.set(
+            f'Iterations: {self.aco_controller.iterations}')
 
     def display_best_solution(self):
         self._destroy_frame()
         self._frame = tk.Frame(self._master)
         self._frame.grid()
 
-        if self.aco_controller.best_solution != inf:
-            best_solution = self.aco_controller.best_solution
+        best_solution = self.aco_controller.get_best_solution()
+
+        if best_solution[0]:
+            best_solution, best_solution_distance = best_solution
         else:
-            best_solution = 'not found'
+            best_solution_distance = 'not found'
 
         text_field = tk.Label(
             self._frame,
-            text=f'Length of the best solution: {best_solution}',
+            text=f'Length of the best solution: {best_solution_distance}',
         )
         text_field.grid(row=0)
 
@@ -186,7 +214,7 @@ class GraphicalUserInterface:
         self._display_best_solution.create_canvas()
         self._display_best_solution.canvas.grid(row=1)
         self._display_best_solution.change_solution_color(
-            self.aco_controller.best_solution_path)
+            best_solution)
 
         start_again_button = tk.Button(
             self._frame, text='Start again', command=self.run)
@@ -212,7 +240,10 @@ class GraphicalUserInterface:
         self._draw_map.canvas.grid(row=0)
 
         draw_button = tk.Button(
-            self._frame, text='Start', command=self.create_display_map)
+            self._frame,
+            text='Finish drawing',
+            command=self.create_display_map,
+        )
         draw_button.grid(row=1)
 
         self._master.mainloop()

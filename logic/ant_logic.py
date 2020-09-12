@@ -1,5 +1,6 @@
 from math import sqrt
 from random import choice, choices
+from typing import List, Tuple
 
 from logic.pheromone_logic import PheromoneLogic
 
@@ -14,13 +15,18 @@ class AntLogic:
         self._mode = 0 if self.position == self._home_position else 1
         self.tabu_list = []
         self.solution = []
+        self.last_solution = []
         self.distance = 0
         self._possible_moves = [(-1, -1), (-1, 0), (-1, 1),
                                 (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-    def _calculate_distance(self):
-        for (x_1, y_1), (x_2, y_2) in zip(self.solution[:-1], self.solution[1:]):
-            self.distance += sqrt(abs(x_1 - x_2) + abs(y_1 - y_2))
+    def calculate_distance(self, solution: List[Tuple[int, int]]):
+        distance = 0
+
+        for (x_1, y_1), (x_2, y_2) in zip(solution[:-1], solution[1:]):
+            distance += sqrt(abs(x_1 - x_2) + abs(y_1 - y_2))
+
+        return distance
 
     def choose_path(self, alpha: int):
         self.tabu_list.append(self.position)
@@ -66,13 +72,13 @@ class AntLogic:
             self._mode = 0
             self.tabu_list.append(choosen_move)
             self.solution = self.tabu_list
-            self._calculate_distance()
+            self.distance = self.calculate_distance(self.solution)
             self.tabu_list = []
         elif choosen_move == self._food_position and self._mode == 0:
             self._mode = 1
             self.tabu_list.append(choosen_move)
             self.solution = self.tabu_list
-            self._calculate_distance()
+            self.distance = self.calculate_distance(self.solution)
             self.tabu_list = []
 
         self.position = choosen_move

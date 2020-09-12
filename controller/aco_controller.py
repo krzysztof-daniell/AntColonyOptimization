@@ -1,4 +1,4 @@
-from math import inf
+from math import inf, sqrt
 
 from logic.ant_logic import AntLogic
 from logic.pheromone_logic import PheromoneLogic
@@ -36,7 +36,27 @@ class ACOController:
                     self.best_solution = ant.distance
                     self.best_solution_path = ant.solution
 
+                ant.last_solution = ant.solution
                 ant.solution = []
                 ant.distance = 0
 
         self.iterations += 1
+
+    def get_best_solution(self):
+        all_solutions = [ant.last_solution for ant in self.ants]
+        sorted_all_solutions = [sorted(solution) for solution in all_solutions]
+        unique_solutions = [list(solution) for solution in set(
+            tuple(solution) for solution in all_solutions)]
+
+        for i, solution in enumerate(unique_solutions):
+            unique_solutions[i] = (
+                solution, sorted_all_solutions.count(sorted(solution)))
+
+        best_solution = max(unique_solutions, key=lambda x: x[1])[0]
+        best_solution_distance = AntLogic(
+            self.pheromone).calculate_distance(best_solution)
+
+        print(best_solution)
+        print(best_solution_distance)
+
+        return best_solution, best_solution_distance
