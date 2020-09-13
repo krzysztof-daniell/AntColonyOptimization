@@ -11,7 +11,6 @@ class AntLogic:
         self._home_position = pheromone.home_position
         self._food_position = pheromone.food_position
         self.position = choice([self._home_position, self._food_position])
-        # self.position = self._home_position
         self._mode = 0 if self.position == self._home_position else 1
         self.tabu_list = []
         self.solution = []

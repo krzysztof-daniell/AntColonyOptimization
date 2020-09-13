@@ -1,5 +1,6 @@
 import tkinter as tk
-from math import inf
+import tkinter.messagebox as messagebox
+import webbrowser
 
 from controller.aco_controller import ACOController
 from graphics.display_map_canvas import DisplayMapCanvas
@@ -21,7 +22,7 @@ class GraphicalUserInterface:
         self._width = width
         self._height = height
         self._field_size = field_size
-        self._master = tk.Tk()
+        self._master = self._create_master()
         self._frame = tk.Frame(self._master)
         self._display_map_object = display_map
         self._display_map = None
@@ -33,20 +34,37 @@ class GraphicalUserInterface:
         self.aco_controller_object = aco_controller
         self.aco_controller = None
 
+    def _create_master(self) -> tk.Tk:
+        master = tk.Tk()
+        master.title('Ant Colony Optimization')
+        master.protocol("WM_DELETE_WINDOW", self._on_closing)
+
+        return master
+
+    def _on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self._master.destroy()
+
     def _destroy_frame(self):
         self._frame.destroy()
+
+    def web_callback(self, url: str) -> None:
+        webbrowser.open_new(url)
 
     def run(self):
         self._destroy_frame()
         self._frame = tk.Frame(self._master)
         self._frame.grid()
 
+        url = 'https://en.wikipedia.org/wiki/Ant_colony_optimization_algorithms'
+        text = tk.Label(self._frame, text='Ant colony optimization algorithms',
+                        fg='blue', cursor='hand2', justify=tk.LEFT)
+        text.grid(row=0, padx=10)
+        text.bind("<Button-1>", lambda e: self.web_callback(url))
+
         draw_button = tk.Button(
             self._frame, text='Draw map', command=self.draw_map)
-        draw_button.grid(row=0, column=0, padx=5, pady=5)
-
-        choose_button = tk.Button(self._frame, text='Choose map')
-        choose_button.grid(row=0, column=1, padx=5, pady=5)
+        draw_button.grid(row=1, pady=5)
 
         self._master.mainloop()
 
@@ -63,8 +81,7 @@ class GraphicalUserInterface:
         )
 
     def create_display_map(self):
-        if self._drawn_map_matrix is None:
-            self._drawn_map_matrix = self._draw_map.pheromone_matrix
+        self._drawn_map_matrix = self._draw_map.pheromone_matrix
 
         self._create_aco_controller()
         self._destroy_frame()
@@ -136,31 +153,13 @@ class GraphicalUserInterface:
         )
         text_field.grid(row=20, column=0, columnspan=2, sticky=tk.W)
 
-        start_button = tk.Button(
-            self._frame, text='Start', command=self.create_display_map)
-        start_button.grid(row=20, column=1)
-
-        reset_button = tk.Button(
-            self._frame, text='Reset', command=self.create_display_map)
-        reset_button.grid(row=20, column=2)
-
         finish_button = tk.Button(
-            self._frame, text='Finish', command=self.display_best_solution)
-        finish_button.grid(row=20, column=3)
+            self._frame,
+            text='Display best solution',
+            command=self.display_best_solution,
+        )
+        finish_button.grid(row=20, column=3, sticky=tk.E, padx=10, pady=5)
 
-        # while True:
-        #     for ant in self.aco_controller.ants:
-        #         self.aco_controller.choose_path_of_an_ant(ant, alpha.get())
-        #         self.change_ant_position_on_display_map(ant)
-
-        #     self.update_display_map()
-        #     self.aco_controller.evaporate_pheromone(
-        #         evaporate_coefficent.get())
-        #     self.aco_controller.deposit_pheromone(
-        #         deposit_coefficent.get())
-
-        #     string_variable.set(
-        #         f'Iterations: {self.aco_controller.iterations}')
         while True:
             self._aco_step(
                 evaporate_coefficent,
@@ -218,7 +217,7 @@ class GraphicalUserInterface:
 
         start_again_button = tk.Button(
             self._frame, text='Start again', command=self.run)
-        start_again_button.grid(row=2)
+        start_again_button.grid(row=2, pady=5)
 
     def change_ant_position_on_display_map(self, ant: AntLogic):
         self._display_map.change_field_color(ant)
@@ -241,10 +240,10 @@ class GraphicalUserInterface:
 
         draw_button = tk.Button(
             self._frame,
-            text='Finish drawing',
+            text='Start ACO',
             command=self.create_display_map,
         )
-        draw_button.grid(row=1)
+        draw_button.grid(row=1, padx=10, pady=5)
 
         self._master.mainloop()
 
