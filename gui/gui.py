@@ -236,14 +236,42 @@ class GraphicalUserInterface:
         self._draw_map = self._draw_map_object(
             self._width, self._height, self._field_size, self._frame)
         self._draw_map.create_canvas()
-        self._draw_map.canvas.grid(row=0)
+        self._draw_map.canvas.grid(row=0, column=1, rowspan=5)
+
+        place_home = tk.Label(
+            self._frame,
+            text='Place home:\n\n<Mouse-Left (double click)>',
+            justify=tk.LEFT,
+        )
+        place_home.grid(row=0, column=0, sticky='NW')
+
+        place_food = tk.Label(
+            self._frame,
+            text='Place food:\n\n<Mouse-Right (double click)>',
+            justify=tk.LEFT,
+        )
+        place_food.grid(row=1, column=0, sticky='NW')
+
+        draw_wall = tk.Label(
+            self._frame,
+            text='Draw wall:\n\n<Mouse-Right (click or press)>',
+            justify=tk.LEFT,
+        )
+        draw_wall.grid(row=2, column=0, sticky='NW')
+
+        erease_wall = tk.Label(
+            self._frame,
+            text='Erease:\n\n<Mouse-Left (click or press)>',
+            justify=tk.LEFT,
+        )
+        erease_wall.grid(row=3, column=0, sticky='NW')
 
         draw_button = tk.Button(
             self._frame,
             text='Start ACO',
             command=self.create_display_map,
         )
-        draw_button.grid(row=1, padx=10, pady=5)
+        draw_button.grid(row=4, column=0, padx=10, pady=5)
 
         self._master.mainloop()
 

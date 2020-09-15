@@ -1,5 +1,3 @@
-from math import inf, sqrt
-
 from logic.ant_logic import AntLogic
 from logic.pheromone_logic import PheromoneLogic
 
@@ -49,8 +47,5 @@ class ACOController:
         best_solution = max(unique_solutions, key=lambda x: x[1])[0]
         best_solution_distance = AntLogic(
             self.pheromone).calculate_distance(best_solution)
-
-        print(best_solution)
-        print(best_solution_distance)
 
         return best_solution, best_solution_distance
